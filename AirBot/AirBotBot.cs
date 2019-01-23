@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
@@ -20,11 +17,14 @@ namespace AirBot
     /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
     public class AirBotBot : IBot
     {
+        private readonly AirBotAccessors _accessors;
+
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>                        
-        public AirBotBot()
+        public AirBotBot(AirBotAccessors accessors)
         {
+            _accessors = accessors;
         }
 
         /// <summary>
@@ -39,13 +39,28 @@ namespace AirBot
         /// <seealso cref="ConversationState"/>
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
+            var didWelcomeUser = await _accessors.DidWelcomeUser.GetAsync(turnContext, () => false);
+
             // Handle Message activity type, which is the main activity type for shown within a conversational interface
             // Message activities may contain text, speech, interactive cards, and binary or unknown attachments.
             // see https://aka.ms/about-bot-activity-message to learn more about the message and other activity types
             if (turnContext.Activity.Type == ActivityTypes.Message)
             {
+                if (didWelcomeUser == false)
+                {
+                    await _accessors.DidWelcomeUser.SetAsync(turnContext, true);
+                    await _accessors.UserState.SaveChangesAsync(turnContext);
+
+                    var userName = turnContext.Activity.From.Name;
+
+                    await turnContext.SendActivityAsync(Messages.WelcomeMessage, cancellationToken: cancellationToken);
+                    await turnContext.SendActivityAsync(Messages.WhatCanIDoMessage, cancellationToken: cancellationToken);
+                }
+
                 // Echo back to the user whatever they typed.             
-                await turnContext.SendActivityAsync("Hello World", cancellationToken: cancellationToken);
+                //await turnContext.SendActivityAsync("Hello World", cancellationToken: cancellationToken);
+
+                await _accessors.UserState.SaveChangesAsync(turnContext);
             }
         }
     }

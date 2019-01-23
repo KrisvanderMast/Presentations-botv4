@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
@@ -47,28 +48,32 @@ namespace AirBot
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddBot<AirBotBot>(options =>
-           {
-               var secretKey = Configuration.GetSection("botFileSecret")?.Value;
+            {
+                var secretKey = Configuration.GetSection("botFileSecret")?.Value;
 
                 // Loads .bot configuration file and adds a singleton that your Bot can access through dependency injection.
                 var botConfig = BotConfiguration.Load(@".\AirBot.bot", secretKey);
-               services.AddSingleton(sp => botConfig);
+                services.AddSingleton(sp => botConfig);
 
                 // Retrieve current endpoint.
                 var service = botConfig.Services.Where(s => s.Type == "endpoint" && s.Name == "development").FirstOrDefault();
-               if (!(service is EndpointService endpointService))
-               {
-                   throw new InvalidOperationException($"The .bot file does not contain a development endpoint.");
-               }
+                if (!(service is EndpointService endpointService))
+                {
+                    throw new InvalidOperationException($"The .bot file does not contain a development endpoint.");
+                }
 
-               options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
+                options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
 
                 // Catches any errors that occur during a conversation turn and logs them.
                 options.OnTurnError = async (context, exception) =>
-               {
-                   await context.SendActivityAsync("Sorry, it looks like something went wrong.");
-               };
-           });
+                {
+                    await context.SendActivityAsync("Sorry, it looks like something went wrong.");
+                };
+
+                IStorage dataStore = new MemoryStorage();
+                UserState userState = new UserState(dataStore);
+                options.State.Add(userState);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
