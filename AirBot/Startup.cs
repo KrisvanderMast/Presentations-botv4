@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Integration;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Configuration;
@@ -73,6 +74,10 @@ namespace AirBot
                 };
 
                 IStorage dataStore = new MemoryStorage();
+
+                ConversationState conversationState = new ConversationState(dataStore);
+                options.State.Add(conversationState);
+
                 UserState userState = new UserState(dataStore);
                 options.State.Add(userState);
             });
@@ -86,6 +91,12 @@ namespace AirBot
                     throw new InvalidOperationException("BotFrameworkOptions must be configured prior to setting up the State Accessors");
                 }
 
+                var conversationState = options.State.OfType<ConversationState>().FirstOrDefault();
+                if (conversationState == null)
+                {
+                    throw new InvalidOperationException("ConverState must be defined and added before adding user-scoped state accessors.");
+                }
+
                 var userState = options.State.OfType<UserState>().FirstOrDefault();
 
                 if (userState == null)
@@ -95,9 +106,11 @@ namespace AirBot
 
                 // Create the custom state accessor.
                 // State accessors enable other components to read and write individual properties of state.
-                var accessors = new AirBotAccessors(userState)
+                var accessors = new AirBotAccessors(conversationState, userState)
                 {
+                    ConversationDialogState = conversationState.CreateProperty<DialogState>("DialogState"),
                     WelcomeUserState = userState.CreateProperty<WelcomeUserState>(AirBotAccessors.WelcomeUserName),
+                    UserProfile = userState.CreateProperty<UserProfile>("UserProfile")
                 };
 
                 return accessors;
