@@ -23,20 +23,12 @@ namespace AirBot
             // see https://aka.ms/about-bot-activity-message to learn more about the message and other activity types
             if (turnContext.Activity.Type == ActivityTypes.Message)
             {
-                if (didWelcomeUser.DidBotWelcomeUser == false)
-                {
-                    didWelcomeUser.DidBotWelcomeUser = true;
+                await WelcomeNewUser(turnContext, didWelcomeUser, cancellationToken);
 
-                    // Update user state flag to reflect bot handled first user interaction.
 
-                    await _accessors.WelcomeUserState.SetAsync(turnContext, didWelcomeUser);
-                    await _accessors.UserState.SaveChangesAsync(turnContext);
 
-                    var userName = turnContext.Activity.From.Name;
 
-                    await turnContext.SendActivityAsync(Messages.FirstWelcomingMessageToNewUser, cancellationToken: cancellationToken);
-                    await turnContext.SendActivityAsync(Messages.FirstWelcomingMessageToNewUserWhatCanIDo, cancellationToken: cancellationToken);
-                }
+
             }
             else if(turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
             {
@@ -53,11 +45,25 @@ namespace AirBot
                 }
             }
 
-
-
-
-
             await _accessors.UserState.SaveChangesAsync(turnContext);
+        }
+
+        private async Task WelcomeNewUser(ITurnContext turnContext, WelcomeUserState didWelcomeUser, CancellationToken cancellationToken)
+        {
+            if (didWelcomeUser.DidBotWelcomeUser == false)
+            {
+                didWelcomeUser.DidBotWelcomeUser = true;
+
+                // Update user state flag to reflect bot handled first user interaction.
+
+                await _accessors.WelcomeUserState.SetAsync(turnContext, didWelcomeUser);
+                await _accessors.UserState.SaveChangesAsync(turnContext);
+
+                var userName = turnContext.Activity.From.Name;
+
+                await turnContext.SendActivityAsync(Messages.FirstWelcomingMessageToNewUser, cancellationToken: cancellationToken);
+                await turnContext.SendActivityAsync(Messages.FirstWelcomingMessageToNewUserWhatCanIDo, cancellationToken: cancellationToken);
+            }
         }
     }
 }
