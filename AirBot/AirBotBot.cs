@@ -34,8 +34,8 @@ namespace AirBot
 
                     var userName = turnContext.Activity.From.Name;
 
-                    await turnContext.SendActivityAsync("Joske", cancellationToken: cancellationToken);
-                    await turnContext.SendActivityAsync("Franske", cancellationToken: cancellationToken);
+                    await turnContext.SendActivityAsync(Messages.FirstWelcomingMessageToNewUser, cancellationToken: cancellationToken);
+                    await turnContext.SendActivityAsync(Messages.FirstWelcomingMessageToNewUserWhatCanIDo, cancellationToken: cancellationToken);
                 }
             }
             else if(turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
