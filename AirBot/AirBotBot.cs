@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
@@ -25,6 +26,11 @@ namespace AirBot
             if (turnContext.Activity.Type == ActivityTypes.Message)
             {
                 await WelcomeNewUser(turnContext, didWelcomeUser, cancellationToken);
+
+                var text = turnContext.Activity.Text.ToLowerInvariant();
+                var responseText = ProcessInput(text);
+
+                await turnContext.SendActivityAsync(responseText, cancellationToken: cancellationToken);
             }
             else if(turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
             {
@@ -35,8 +41,6 @@ namespace AirBot
                         if(member.Id != turnContext.Activity.Recipient.Id)
                         {
                             await turnContext.SendActivityAsync(Messages.WelcomeMessage, cancellationToken: cancellationToken);
-                            //await turnContext.SendActivityAsync(Messages.WhatCanIDoMessage, cancellationToken: cancellationToken);
-
                             await SendSuggestedActionsAsync(turnContext, cancellationToken);
                         }
                     }
@@ -44,6 +48,19 @@ namespace AirBot
             }
 
             await _accessors.UserState.SaveChangesAsync(turnContext);
+        }
+
+        private static string ProcessInput(string text)
+        {
+            switch (text)
+            {
+                case "book a flight":
+                    return "So you want to book a flight he?";
+                case "get the weather forecast":
+                    return "It's freezing outside!";
+                default:
+                    return "Sorry I didn't get that. Please pick one of the suggested options.";
+            }
         }
 
         private async Task SendSuggestedActionsAsync(ITurnContext turnContext, CancellationToken cancellationToken)
