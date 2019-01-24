@@ -5,63 +5,55 @@ using Microsoft.Bot.Schema;
 
 namespace AirBot
 {
-    /// <summary>
-    /// Represents a bot that processes incoming activities.
-    /// For each user interaction, an instance of this class is created and the OnTurnAsync method is called.
-    /// This is a Transient lifetime service. Transient lifetime services are created
-    /// each time they're requested. Objects that are expensive to construct, or have a lifetime
-    /// beyond a single turn, should be carefully managed.
-    /// For example, the <see cref="MemoryStorage"/> object and associated
-    /// <see cref="IStatePropertyAccessor{T}"/> object are created with a singleton lifetime.
-    /// </summary>
-    /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
     public class AirBotBot : IBot
     {
         private readonly AirBotAccessors _accessors;
 
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>                        
         public AirBotBot(AirBotAccessors accessors)
         {
             _accessors = accessors;
         }
 
-        /// <summary>
-        /// Every conversation turn calls this method.
-        /// </summary>
-        /// <param name="turnContext">A <see cref="ITurnContext"/> containing all the data needed
-        /// for processing this conversation turn. </param>
-        /// <param name="cancellationToken">(Optional) A <see cref="CancellationToken"/> that can be used by other objects
-        /// or threads to receive notice of cancellation.</param>
-        /// <returns>A <see cref="Task"/> that represents the work queued to execute.</returns>
-        /// <seealso cref="BotStateSet"/>
-        /// <seealso cref="ConversationState"/>
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var didWelcomeUser = await _accessors.DidWelcomeUser.GetAsync(turnContext, () => false);
+            var didWelcomeUser = await _accessors.WelcomeUserState.GetAsync(turnContext, () => new WelcomeUserState());
 
             // Handle Message activity type, which is the main activity type for shown within a conversational interface
             // Message activities may contain text, speech, interactive cards, and binary or unknown attachments.
             // see https://aka.ms/about-bot-activity-message to learn more about the message and other activity types
             if (turnContext.Activity.Type == ActivityTypes.Message)
             {
-                if (didWelcomeUser == false)
+                if (didWelcomeUser.DidBotWelcomeUser == false)
                 {
-                    await _accessors.DidWelcomeUser.SetAsync(turnContext, true);
+                    didWelcomeUser.DidBotWelcomeUser = true;
+
+                    // Update user state flag to reflect bot handled first user interaction.
+
+                    await _accessors.WelcomeUserState.SetAsync(turnContext, didWelcomeUser);
                     await _accessors.UserState.SaveChangesAsync(turnContext);
 
                     var userName = turnContext.Activity.From.Name;
 
-                    await turnContext.SendActivityAsync(Messages.WelcomeMessage, cancellationToken: cancellationToken);
-                    await turnContext.SendActivityAsync(Messages.WhatCanIDoMessage, cancellationToken: cancellationToken);
+                    await turnContext.SendActivityAsync("Joske", cancellationToken: cancellationToken);
+                    await turnContext.SendActivityAsync("Franske", cancellationToken: cancellationToken);
                 }
-
-                // Echo back to the user whatever they typed.             
-                //await turnContext.SendActivityAsync("Hello World", cancellationToken: cancellationToken);
-
-                await _accessors.UserState.SaveChangesAsync(turnContext);
             }
+            else if(turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
+            {
+                if(turnContext.Activity.MembersAdded != null)
+                {
+                    foreach (var member in turnContext.Activity.MembersAdded)
+                    {
+                        if(member.Id != turnContext.Activity.Recipient.Id)
+                        {
+                            await turnContext.SendActivityAsync(Messages.WelcomeMessage, cancellationToken: cancellationToken);
+                            await turnContext.SendActivityAsync(Messages.WhatCanIDoMessage, cancellationToken: cancellationToken);
+                        }
+                    }
+                }
+            }
+
+            await _accessors.UserState.SaveChangesAsync(turnContext);
         }
     }
 }

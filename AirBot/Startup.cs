@@ -6,11 +6,13 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Integration;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace AirBot
 {
@@ -73,6 +75,33 @@ namespace AirBot
                 IStorage dataStore = new MemoryStorage();
                 UserState userState = new UserState(dataStore);
                 options.State.Add(userState);
+            });
+
+            services.AddSingleton<AirBotAccessors>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<BotFrameworkOptions>>().Value;
+
+                if (options == null)
+                {
+                    throw new InvalidOperationException("BotFrameworkOptions must be configured prior to setting up the State Accessors");
+                }
+
+                var userState = options.State.OfType<UserState>().FirstOrDefault();
+
+                if (userState == null)
+                {
+                    throw new InvalidOperationException("UserState must be defined and added before adding user-scoped state accessors.");
+                }
+
+                // Create the custom state accessor.
+                // State accessors enable other components to read and write individual properties of state.
+                var accessors = new AirBotAccessors(userState)
+                {
+                    WelcomeUserState = userState.CreateProperty<WelcomeUserState>(AirBotAccessors.WelcomeUserName),
+                };
+
+                return accessors;
+
             });
         }
 

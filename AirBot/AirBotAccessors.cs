@@ -10,19 +10,15 @@ namespace AirBot
             UserState = userState ?? throw new ArgumentNullException(nameof(userState));
         }
 
-        public IStatePropertyAccessor<bool> DidWelcomeUser { get; set; }
+        public static string WelcomeUserName { get; } = $"{nameof(AirBotAccessors)}.WelcomeUserState";
+
+        public IStatePropertyAccessor<WelcomeUserState> WelcomeUserState { get; set; }
 
         public UserState UserState { get; }
     }
 
     public class WelcomeUserState
     {
-        public bool DidAirBotSayHello { get; set; } = false;
-    }
-
-    public class Messages
-    {
-        internal const string WelcomeMessage = @"Hello, I'm AirBot. How may I help you?";
-        internal const string WhatCanIDoMessage = @"You can ask me ...";
+        public bool DidBotWelcomeUser { get; set; } = false;
     }
 }
