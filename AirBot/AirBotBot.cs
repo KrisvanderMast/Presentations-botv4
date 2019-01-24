@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Newtonsoft.Json;
 
 namespace AirBot
 {
@@ -97,6 +100,17 @@ namespace AirBot
             await turnContext.SendActivityAsync(reply, cancellationToken);
         }
 
+        private static Attachment CreateAdaptiveCardAttachment()
+        {
+            var adaptiveCardJson = File.ReadAllText(@".\Resources\flight.json");
+            var adaptiveCardAttachment = new Attachment()
+            {
+                ContentType = "application/vnd.microsoft.card.adaptive",
+                Content = JsonConvert.DeserializeObject(adaptiveCardJson),
+            };
+            return adaptiveCardAttachment;
+        }
+
         private async Task WelcomeNewUser(ITurnContext turnContext, WelcomeUserState didWelcomeUser, CancellationToken cancellationToken)
         {
             if (didWelcomeUser.DidBotWelcomeUser == false)
@@ -146,8 +160,16 @@ namespace AirBot
             var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
             userProfile.HowMany = (int)stepContext.Result;
 
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I booked your flight {userProfile.From}, going to {userProfile.To} for {userProfile.HowMany}."), cancellationToken);
-            await stepContext.Context.SendActivityAsync("Have a great time over there!", cancellationToken: cancellationToken);
+            //await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I booked your flight {userProfile.From}, going to {userProfile.To} for {userProfile.HowMany}."), cancellationToken);
+            //await stepContext.Context.SendActivityAsync("Have a great time over there!", cancellationToken: cancellationToken);
+
+            var reply = stepContext.Context.Activity.CreateReply();
+            reply.Attachments = new List<Attachment>
+            {
+                CreateAdaptiveCardAttachment()
+            };
+
+            await stepContext.Context.SendActivityAsync(reply, cancellationToken);
 
             await SendSuggestedActionsAsync(stepContext.Context, cancellationToken);
 
