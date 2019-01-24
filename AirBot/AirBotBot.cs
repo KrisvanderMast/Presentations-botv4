@@ -160,8 +160,8 @@ namespace AirBot
             var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
             userProfile.HowMany = (int)stepContext.Result;
 
-            //await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I booked your flight {userProfile.From}, going to {userProfile.To} for {userProfile.HowMany}."), cancellationToken);
-            //await stepContext.Context.SendActivityAsync("Have a great time over there!", cancellationToken: cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I booked your flight {userProfile.From}, going to {userProfile.To} for {userProfile.HowMany}."), cancellationToken);
+            await stepContext.Context.SendActivityAsync("Have a great time over there!", cancellationToken: cancellationToken);
 
             var reply = stepContext.Context.Activity.CreateReply();
             reply.Attachments = new List<Attachment>

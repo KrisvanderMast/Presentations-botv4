@@ -1,36 +1,32 @@
 {
-  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-  "version": "1.0",
   "type": "AdaptiveCard",
-  "speak": "Your flight is confirmed for you and 2 other passengers from AMS to SEA",
   "body": [
     {
       "type": "TextBlock",
-      "text": "Passengers",
-      "weight": "bolder",
-      "isSubtle": false
+      "weight": "Bolder",
+      "text": "Passengers"
     },
     {
       "type": "TextBlock",
-      "text": "Jeremy Goldberg",
-      "spacing": "none"
+      "spacing": "None",
+      "text": "Kris van der Mast"
     },
     {
       "type": "TextBlock",
-      "text": "Evan Litvak",
-      "spacing": "none"
+      "spacing": "None",
+      "text": "Salma Haidar"
     },
     {
       "type": "TextBlock",
-      "text": "2 Stops",
-      "weight": "bolder",
-      "spacing": "medium"
+      "spacing": "Medium",
+      "weight": "Bolder",
+      "text": "1 Stops"
     },
     {
       "type": "TextBlock",
-      "text": "Fri, October 10 8:30 AM",
-      "weight": "bolder",
-      "spacing": "none"
+      "spacing": "None",
+      "weight": "Bolder",
+      "text": "Sun, March 18th 8:30 AM"
     },
     {
       "type": "ColumnSet",
@@ -38,79 +34,6 @@
       "columns": [
         {
           "type": "Column",
-          "width": 1,
-          "items": [
-            {
-              "type": "TextBlock",
-              "text": "San Francisco",
-              "isSubtle": true
-            },
-            {
-              "type": "TextBlock",
-              "size": "extraLarge",
-              "color": "accent",
-              "text": "SFO",
-              "spacing": "none"
-            }
-          ]
-        },
-        {
-          "type": "Column",
-          "width": "auto",
-          "items": [
-            {
-              "type": "TextBlock",
-              "text": " "
-            },
-            {
-              "type": "Image",
-              "url": "http://adaptivecards.io/content/airplane.png",
-              "size": "small",
-              "spacing": "none"
-            }
-          ]
-        },
-        {
-          "type": "Column",
-          "width": 1,
-          "items": [
-            {
-              "type": "TextBlock",
-              "horizontalAlignment": "right",
-              "text": "Amsterdam",
-              "isSubtle": true
-            },
-            {
-              "type": "TextBlock",
-              "horizontalAlignment": "right",
-              "size": "extraLarge",
-              "color": "accent",
-              "text": "AMS",
-              "spacing": "none"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "TextBlock",
-      "text": "Non-Stop",
-      "weight": "bolder",
-      "spacing": "medium"
-    },
-    {
-      "type": "TextBlock",
-      "text": "Fri, October 18 9:50 PM",
-      "weight": "bolder",
-      "spacing": "none"
-    },
-    {
-      "type": "ColumnSet",
-      "separator": true,
-      "columns": [
-        {
-          "type": "Column",
-          "width": 1,
           "items": [
             {
               "type": "TextBlock",
@@ -119,16 +42,16 @@
             },
             {
               "type": "TextBlock",
-              "size": "extraLarge",
-              "color": "accent",
-              "text": "AMS",
-              "spacing": "none"
+              "spacing": "None",
+              "size": "ExtraLarge",
+              "color": "Accent",
+              "text": "AMS"
             }
-          ]
+          ],
+          "width": 1
         },
         {
           "type": "Column",
-          "width": "auto",
           "items": [
             {
               "type": "TextBlock",
@@ -136,64 +59,80 @@
             },
             {
               "type": "Image",
+              "spacing": "None",
               "url": "http://adaptivecards.io/content/airplane.png",
-              "size": "small",
-              "spacing": "none"
+              "size": "Small"
             }
-          ]
+          ],
+          "width": "auto"
         },
         {
           "type": "Column",
-          "width": 1,
           "items": [
             {
               "type": "TextBlock",
-              "horizontalAlignment": "right",
-              "text": "San Francisco",
+              "horizontalAlignment": "Right",
+              "text": "Seattle",
               "isSubtle": true
             },
             {
               "type": "TextBlock",
-              "horizontalAlignment": "right",
-              "size": "extraLarge",
-              "color": "accent",
-              "text": "SFO",
-              "spacing": "none"
+              "horizontalAlignment": "Right",
+              "spacing": "None",
+              "size": "ExtraLarge",
+              "color": "Accent",
+              "text": "SEA"
             }
-          ]
+          ],
+          "width": 1
         }
       ]
     },
     {
+      "type": "TextBlock",
+      "spacing": "Medium",
+      "weight": "Bolder",
+      "text": "Non-Stop"
+    },
+    {
+      "type": "TextBlock",
+      "spacing": "None",
+      "weight": "Bolder",
+      "text": "Fri, October 18 9:50 PM"
+    },
+    {
       "type": "ColumnSet",
-      "spacing": "medium",
+      "spacing": "Medium",
       "columns": [
         {
           "type": "Column",
-          "width": "1",
           "items": [
             {
               "type": "TextBlock",
+              "size": "Medium",
               "text": "Total",
-              "size": "medium",
               "isSubtle": true
             }
-          ]
+          ],
+          "width": 1
         },
         {
           "type": "Column",
-          "width": 1,
           "items": [
             {
               "type": "TextBlock",
-              "horizontalAlignment": "right",
-              "text": "$4,032.54",
-              "size": "medium",
-              "weight": "bolder"
+              "horizontalAlignment": "Right",
+              "size": "Medium",
+              "weight": "Bolder",
+              "text": "$4,032.54"
             }
-          ]
+          ],
+          "width": 1
         }
       ]
     }
-  ]
+  ],
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.0",
+  "speak": "Your flight is confirmed for you and 2 other passengers from AMS to SEA"
 }
