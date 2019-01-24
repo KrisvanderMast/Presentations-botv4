@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
@@ -22,11 +21,8 @@ namespace AirBot
             var waterfallSteps = new WaterfallStep[]
             {
                 FromStepAsync,
-                //FromConfirmStepAsync,
                 ToStepAsync,
-                //ToConfirmStepAsync,
                 HowManyPeopleStepAsync,
-                //HowManyPeopleConfirmStepAsync,
                 SummaryStepAsync
             };
 
@@ -55,11 +51,6 @@ namespace AirBot
                 {
                     await dialogContext.BeginDialogAsync("booking", null, cancellationToken);
                 }
-
-                //var text = turnContext.Activity.Text.ToLowerInvariant();
-                //var responseText = ProcessInput(text, turnContext);
-
-                //await turnContext.SendActivityAsync(responseText, cancellationToken: cancellationToken);
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
             {
@@ -131,20 +122,6 @@ namespace AirBot
             return await stepContext.PromptAsync("from", new PromptOptions { Prompt = MessageFactory.Text("Where do you want to start your journey?") }, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> FromConfirmStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            // Get the current profile object from user state.
-            var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
-
-            // Update the profile.
-            userProfile.From = (string)stepContext.Result;
-
-            // We can send messages to the user at any point in the WaterfallStep.
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Thanks {stepContext.Result}."), cancellationToken);
-
-            // WaterfallStep always finishes with the end of the Waterfall or with another dialog; here it is a Prompt Dialog.
-            return await stepContext.PromptAsync("confirm", new PromptOptions { Prompt = MessageFactory.Text("Would you like to give your age?") }, cancellationToken);
-        }
         private async Task<DialogTurnResult> ToStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the current profile object from user state.
@@ -154,11 +131,6 @@ namespace AirBot
             userProfile.From = (string)stepContext.Result;
 
             return await stepContext.PromptAsync("to", new PromptOptions { Prompt = MessageFactory.Text("Where do you want to go to?") }, cancellationToken);
-        }
-
-        private Task<DialogTurnResult> ToConfirmStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
 
         private async Task<DialogTurnResult> HowManyPeopleStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -171,25 +143,16 @@ namespace AirBot
 
             return await stepContext.PromptAsync("howmany", new PromptOptions { Prompt = MessageFactory.Text("How many people?") }, cancellationToken);
         }
-        private Task<DialogTurnResult> HowManyPeopleConfirmStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
 
         private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            // Get the current profile object from user state.
             var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
-
-            // Update the profile.
             userProfile.HowMany = (int)stepContext.Result;
 
-            //if ((bool)stepContext.Result)
-            //{
-                //var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I booked your flight {userProfile.From}, going to {userProfile.To} for {userProfile.HowMany}."), cancellationToken);
-                await stepContext.Context.SendActivityAsync("Have a great time over there!", cancellationToken: cancellationToken);
-            //}
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"I booked your flight {userProfile.From}, going to {userProfile.To} for {userProfile.HowMany}."), cancellationToken);
+            await stepContext.Context.SendActivityAsync("Have a great time over there!", cancellationToken: cancellationToken);
+
+            await SendSuggestedActionsAsync(stepContext.Context, cancellationToken);
 
             // WaterfallStep always finishes with the end of the Waterfall or with another dialog, here it is the end.
             return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
