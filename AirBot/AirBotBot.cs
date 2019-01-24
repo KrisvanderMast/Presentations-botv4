@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
@@ -24,11 +25,6 @@ namespace AirBot
             if (turnContext.Activity.Type == ActivityTypes.Message)
             {
                 await WelcomeNewUser(turnContext, didWelcomeUser, cancellationToken);
-
-
-
-
-
             }
             else if(turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
             {
@@ -39,13 +35,31 @@ namespace AirBot
                         if(member.Id != turnContext.Activity.Recipient.Id)
                         {
                             await turnContext.SendActivityAsync(Messages.WelcomeMessage, cancellationToken: cancellationToken);
-                            await turnContext.SendActivityAsync(Messages.WhatCanIDoMessage, cancellationToken: cancellationToken);
+                            //await turnContext.SendActivityAsync(Messages.WhatCanIDoMessage, cancellationToken: cancellationToken);
+
+                            await SendSuggestedActionsAsync(turnContext, cancellationToken);
                         }
                     }
                 }
             }
 
             await _accessors.UserState.SaveChangesAsync(turnContext);
+        }
+
+        private async Task SendSuggestedActionsAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+        {
+            var reply = turnContext.Activity.CreateReply("Please pick your choice...");
+
+            reply.SuggestedActions = new SuggestedActions
+            {
+                Actions = new List<CardAction>
+                {
+                    new CardAction { Title = "Book a flight", Type = ActionTypes.ImBack, Value = "Book a flight" },
+                    new CardAction { Title = "Get the weather forecast", Type = ActionTypes.ImBack, Value = "Get the weather forecast" },
+                }
+            };
+
+            await turnContext.SendActivityAsync(reply, cancellationToken);
         }
 
         private async Task WelcomeNewUser(ITurnContext turnContext, WelcomeUserState didWelcomeUser, CancellationToken cancellationToken)
